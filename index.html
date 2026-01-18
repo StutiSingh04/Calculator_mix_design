@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concrete Mix Design Calculator (IS 10262:2019)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  
+  <div id="bg-slider"></div>
+
+  <div class="container my-5" style="position: relative; z-index: 1;">
+    <div class="card p-4 shadow-lg main-card">
+      <h1 class="text-center mb-4">Concrete Mix Design Calculator</h1>
+      <p class="text-center text-muted mb-5">
+        Based on IS 10262:2019 & Custom Strength Curve
+      </p>
+      
+      <form id="mixForm" class="row g-3">
+        
+        <div class="col-12"><h5 class="text-primary border-bottom pb-2">1. Design Stipulations</h5></div>
+
+        <div class="col-md-4">
+          <label for="fck" class="form-label">Target Grade (fck) [MPa]</label>
+          <input type="number" id="fck" class="form-control" placeholder="e.g., 25" min="10" max="100" required />
+        </div>
+
+        <div class="col-md-4">
+          <label for="slump" class="form-label">Workability / Slump [mm]</label>
+          <input type="number" id="slump" class="form-control" placeholder="e.g., 100" min="0" required />
+        </div>
+
+        <div class="col-md-4">
+          <label for="exposure" class="form-label">Exposure Condition</label>
+          <select id="exposure" class="form-select" required>
+            <option value="Mild">Mild</option>
+            <option value="Moderate">Moderate</option>
+            <option value="Severe">Severe</option>
+            <option value="VerySevere">Very Severe</option>
+            <option value="Extreme">Extreme</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="maxAggSize" class="form-label">Max Aggregate Size</label>
+          <select id="maxAggSize" class="form-select" required>
+            <option value="10">10 mm</option>
+            <option value="20" selected>20 mm</option>
+            <option value="40">40 mm</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="pumpable" class="form-label">Method of Placement</label>
+          <select id="pumpable" class="form-select" required>
+            <option value="no">Direct Pour (Chute)</option>
+            <option value="yes">Pumpable</option>
+          </select>
+        </div>
+
+        <div class="col-12 mt-4"><h5 class="text-primary border-bottom pb-2">2. Material Properties</h5></div>
+
+        <div class="col-md-3">
+          <label for="sgCement" class="form-label">SG Cement</label>
+          <input type="number" id="sgCement" class="form-control" step="0.01" value="3.15" required />
+        </div>
+
+        <div class="col-md-3">
+          <label for="sgFA" class="form-label">SG Fine Agg (FA)</label>
+          <input type="number" id="sgFA" class="form-control" step="0.01" value="2.65" required />
+        </div>
+
+        <div class="col-md-3">
+          <label for="sgCA" class="form-label">SG Coarse Agg (CA)</label>
+          <input type="number" id="sgCA" class="form-control" step="0.01" value="2.70" required />
+        </div>
+
+         <div class="col-md-3">
+          <label for="faZone" class="form-label">Fine Agg Zone</label>
+          <select id="faZone" class="form-select" required>
+            <option value="1">Zone I</option>
+            <option value="2" selected>Zone II</option>
+            <option value="3">Zone III</option>
+            <option value="4">Zone IV</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="absFA" class="form-label">Water Abs. FA (%)</label>
+            <input type="number" id="absFA" class="form-control" step="0.1" value="1.0" required />
+        </div>
+
+        <div class="col-md-3">
+            <label for="absCA" class="form-label">Water Abs. CA (%)</label>
+            <input type="number" id="absCA" class="form-control" step="0.1" value="0.5" required />
+        </div>
+
+        <div class="col-md-3">
+            <label for="mcFA" class="form-label">Moisture FA (%)</label>
+            <input type="number" id="mcFA" class="form-control" step="0.1" value="0" placeholder="Optional" />
+        </div>
+
+        <div class="col-md-3">
+            <label for="mcCA" class="form-label">Moisture CA (%)</label>
+            <input type="number" id="mcCA" class="form-control" step="0.1" value="0" placeholder="Optional" />
+        </div>
+
+        <div class="col-12 mt-4"><h5 class="text-primary border-bottom pb-2">3. Admixture</h5></div>
+
+        <div class="col-md-6">
+            <label for="admixtureType" class="form-label">Admixture Type</label>
+            <select id="admixtureType" class="form-select" required>
+              <option value="plasticizer">Normal Plasticizer (Reduce ~10% water)</option>
+              <option value="superplasticizer">Superplasticizer (Reduce ~23% water)</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="sgPlasticizer" class="form-label">SG Admixture</label>
+            <input type="number" id="sgPlasticizer" class="form-control" step="0.01" value="1.10" required />
+        </div>
+
+        <div class="col-12 mt-5">
+          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">Calculate Mix Design</button>
+        </div>
+      </form>
+
+      <div id="result" class="result-container mt-5" style="display:none;">
+        <div class="alert alert-success">
+            <h4 class="alert-heading">Calculation Successful!</h4>
+            <p>Below is the detailed mix design based on your inputs and custom strength curve.</p>
+        </div>
+        <pre id="output" class="p-4 bg-light border rounded shadow-sm"></pre>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="updated_script.js" defer></script>
+</body>
+</html>
