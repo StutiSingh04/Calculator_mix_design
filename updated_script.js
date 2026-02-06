@@ -148,42 +148,54 @@ document.getElementById("mixForm").addEventListener("submit", function(e) {
   let volFA_Base = 1 - volCA_Base;
 
   // ==========================================
-  // 7. MIX CALCULATIONS (Mass)
+ // ==========================================
+  // 7. MIX CALCULATIONS (Refined per IS 10262:2019)
   // ==========================================
   let volCement = cementContent / (sgCement * 1000);
   let volWater = finalWater / 1000;
   let volAdmixture = (cementContent * (plasticizerDosage/100)) / (sgPlasticizer * 1000);
-  let volAir = 0.01; // 1% entrapped air is standard practice
+  
+  // Table 3: Refined Air Content based on Aggregate Size
+  let airMap = { 10: 0.015, 20: 0.010, 40: 0.008 };
+  let volAir = airMap[maxAggSize] || 0.010; 
 
   let volTotalAgg = 1 - (volCement + volWater + volAdmixture + volAir);
 
-  let massCA = volTotalAgg * volCA_Base * sgCA * 1000;
-  let massFA = volTotalAgg * volFA_Base * sgFA * 1000;
-  
-  // (Optional) Moisture Adjustments could go here if `mcFA` inputs were used to adjust weights
-  // For Mix Design (Dry), we output the dry weights.
+  // SSD Masses (Theoretical)
+  let massCA_SSD = volTotalAgg * volCA_Base * sgCA * 1000;
+  let massFA_SSD = volTotalAgg * volFA_Base * sgFA * 1000;
 
   // ==========================================
-  // 8. OUTPUT
+  // 8. FIELD ADJUSTMENTS (Moisture & Absorption)
+  // ==========================================
+  // Formula: Free Water = Moisture Content - Absorption
+  let freeWaterFA = (mcFA - absFA) / 100 * massFA_SSD;
+  let freeWaterCA = (mcCA - absCA) / 100 * massCA_SSD;
+  let totalFreeWater = freeWaterFA + freeWaterCA;
+
+  // Adjusted Weights for the Batch
+  let finalMassFA = massFA_SSD + (mcFA / 100 * massFA_SSD);
+  let finalMassCA = massCA_SSD + (mcCA / 100 * massCA_SSD);
+  let finalWaterField = finalWater - totalFreeWater;
+
+  // ==========================================
+  // 9. FINAL OUTPUT
   // ==========================================
   const outputText = 
 `--- DESIGN STIPULATIONS ---
 Target Mean Strength: ${finalTargetStrength.toFixed(2)} MPa
-Required W/C (Curve): ${calculatedWC.toFixed(3)}
-Adopted W/C (Limit):  ${adoptedWC.toFixed(3)}
+W/C Ratio: ${adoptedWC.toFixed(3)}
+Entrapped Air: ${(volAir * 100).toFixed(1)}%
 
---- QUANTITIES (kg/m³) ---
+--- QUANTITIES (Field Adjusted kg/m³) ---
 Cement:           ${cementContent.toFixed(1)} kg
-Water:            ${finalWater.toFixed(1)} kg
-Fine Aggregate:   ${massFA.toFixed(1)} kg
-Coarse Aggregate: ${massCA.toFixed(1)} kg
+Water:            ${finalWaterField.toFixed(1)} kg (Adjusted for moisture)
+Fine Aggregate:   ${finalMassFA.toFixed(1)} kg
+Coarse Aggregate: ${finalMassCA.toFixed(1)} kg
 Admixture:        ${(cementContent * (plasticizerDosage/100)).toFixed(2)} kg
 
---- FINAL RATIOS ---
-Cement : FA : CA
-  1    : ${(massFA/cementContent).toFixed(2)} : ${(massCA/cementContent).toFixed(2)}
+--- FINAL RATIOS (By Weight) ---
+1 : ${(finalMassFA/cementContent).toFixed(2)} : ${(finalMassCA/cementContent).toFixed(2)}
 `;
 
   document.getElementById("output").innerText = outputText;
-  document.getElementById("result").style.display = "block";
-});
