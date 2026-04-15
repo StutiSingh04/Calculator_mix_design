@@ -49,6 +49,19 @@
                         <option value="yes">Yes</option>
                     </select>
                 </div>
+                <!-- ADDED MISSING W/C RATIO MODE INPUTS HERE -->
+                <div>
+                    <label>W/C Ratio Mode:</label>
+                    <select id="wcMode" onchange="toggleWCInput()">
+                        <option value="auto">Auto Calculate</option>
+                        <option value="manual">Manual Entry</option>
+                    </select>
+                </div>
+                <div id="manualWCContainer" style="display: none;">
+                    <label>Manual W/C Ratio:</label>
+                    <input type="number" step="0.01" id="manualWC" value="0.45">
+                </div>
+                <!-- END OF ADDED INPUTS -->
             </div>
         </div>
 
